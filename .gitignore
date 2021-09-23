@@ -1,8 +1,14 @@
+# Custom
+temp*
+*temp
+tmp*
+*tmp
+
 # Prerequisites
 *.d
 
 # Object files
-*.o
+#*.o
 *.ko
 *.obj
 *.elf
