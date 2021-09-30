@@ -58,8 +58,18 @@ while_fin:
     ; print(x)
 	push dword [_x]
 	call print_int
-	add esp, 4 ; Esto es innecesario en realidad
+	add esp, 4 
 
+programa_fin:
 	mov esp, [__esp]
- ret
+    ret
 
+
+
+if eax == 0:
+    eax != 0
+else
+    eax = 0
+
+11111111111
+00000000000

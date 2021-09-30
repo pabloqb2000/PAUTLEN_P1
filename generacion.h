@@ -71,7 +71,6 @@ aritmético-lógica y se necesita introducirlo en la pila.
 en el fuente NASM
 - es_variable indica si este operando es una variable (como por ejemplo b1)
 con un 1 u otra cosa (como por ejemplo 34) con un 0. Recuerda que en el
-5/24
 primer caso internamente se representará como _b1 y, sin embargo, en el
 segundo se representará tal y como esté en el argumento (34).
 */
@@ -139,7 +138,6 @@ void igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
 void distinto(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
 void menor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
 void mayor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
-6/24
 void menor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
 void mayor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta);
 
