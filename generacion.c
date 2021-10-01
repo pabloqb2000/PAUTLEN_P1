@@ -34,10 +34,10 @@ primera práctica siempre recibirá el valor 1.
 void declarar_variable(FILE* fpasm, char * nombre, int tipo, int tamano) {
     switch (tipo) {
         case ENTERO:
-            fprintf(fpasm, "\t%s resd %d", nombre, tamano);
+            fprintf(fpasm, "\t_%s resd %d\n", nombre, tamano);
             break;
         case BOOLEANO:
-            fprintf(fpasm, "\t%s resd %d", nombre, tamano);
+            fprintf(fpasm, "\t_%s resd %d\n", nombre, tamano);
             break;
         default:
             // Not implemented
@@ -176,7 +176,7 @@ void multiplicar(FILE* fpasm, int es_variable_1, int es_variable_2) {
     descargar_pila(fpasm, es_variable_1, es_variable_2);
     
     // Hacer operacion
-    fprintf(fpasm, "\tmov edx\n");
+    fprintf(fpasm, "\tcdq\n");
     fprintf(fpasm, "\timul ebx\n");
 
     // Almacenar resultado
@@ -188,6 +188,7 @@ void dividir(FILE* fpasm, int es_variable_1, int es_variable_2) {
     descargar_pila(fpasm, es_variable_1, es_variable_2);
     
     // Hacer operacion
+    fprintf(fpasm, "\tcdq\n");
     fprintf(fpasm, "\tidiv ebx\n");
     // CONTROL DE ERRORES
 
@@ -227,9 +228,9 @@ void cambiar_signo(FILE* fpasm, int es_variable){
     if (es_variable)
         fprintf(fpasm, "\tmov eax, [eax]\n");
 
-    fprintf(fpasm, "\tmov ebx, -1\n");
-    fprintf(fpasm, "\timul ebx\n");
-    fprintf(fpasm, "\tpush eax\n");
+    fprintf(fpasm, "\tmov ebx, 0\n");
+    fprintf(fpasm, "\tsub ebx, eax\n");
+    fprintf(fpasm, "\tpush ebx\n");
 }
 
 /*
@@ -268,7 +269,7 @@ void igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) {
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tje IGUAL_%d\n", etiqueta);        // je - jump equal
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_IGUAL_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_IGUAL_%d\n", etiqueta);
     fprintf(fpasm, "IGUAL_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_IGUAL_%d:\n", etiqueta);
@@ -280,7 +281,7 @@ void distinto(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) {
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tjne NOIGUAL_%d\n", etiqueta);     // jne - jump not equal
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_NOIGUAL_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_NOIGUAL_%d\n", etiqueta);
     fprintf(fpasm, "NOIGUAL_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_NOIGUAL_%d:\n", etiqueta);
@@ -292,7 +293,7 @@ void menor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) 
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tjle MENORIGUAL_%d\n", etiqueta);  // jle - jump less than or equal
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_MENORIGUAL_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_MENORIGUAL_%d\n", etiqueta);
     fprintf(fpasm, "MENORIGUAL_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_MENORIGUAL_%d:\n", etiqueta);
@@ -304,7 +305,7 @@ void mayor_igual(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) 
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tjge MAYORIGUAL_%d\n", etiqueta);  // jge - jump greater than or equal
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_MAYORIGUAL_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_MAYORIGUAL_%d\n", etiqueta);
     fprintf(fpasm, "MAYORIGUAL_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_MAYORIGUAL_%d:\n", etiqueta);
@@ -316,7 +317,7 @@ void menor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) {
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tjl MENOR_%d\n", etiqueta);        // jl - jump less than
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_MENOR_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_MENOR_%d\n", etiqueta);
     fprintf(fpasm, "MENOR_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_MENOR_%d:\n", etiqueta);
@@ -328,7 +329,7 @@ void mayor(FILE* fpasm, int es_variable1, int es_variable2, int etiqueta) {
     fprintf(fpasm, "\tcmp eax, ebx\n");
     fprintf(fpasm, "\tjg MAYOR_%d\n", etiqueta);        // jg - jump greater than
     fprintf(fpasm, "\tpush dword 0\n");        
-    fprintf(fpasm, "\tjmp NO_MAYOR_%s\n", etiqueta);
+    fprintf(fpasm, "\tjmp NO_MAYOR_%d\n", etiqueta);
     fprintf(fpasm, "MAYOR_%d:\n", etiqueta);
     fprintf(fpasm, "\tpush dword 1\n");
     fprintf(fpasm, "NO_MAYOR_%d:\n", etiqueta);
@@ -347,15 +348,15 @@ Se deben insertar en la pila los argumentos necesarios, realizar la llamada
 void leer(FILE* fpasm, char* nombre, int tipo) {
     switch (tipo) {
         case ENTERO:
-            fprintf(fpasm, "\tpush dword %s", nombre);
+            fprintf(fpasm, "\n\tpush dword _%s\n", nombre);
             fprintf(fpasm, "\tcall scan_int\n");
-            fprintf(fpasm, "\tcall add esp, 4\n\n");
+            fprintf(fpasm, "\tadd esp, 4\n\n");
             break;
 
         case BOOLEANO: 
-            fprintf(fpasm, "\tpush dword %s", nombre);
+            fprintf(fpasm, "\n\tpush dword _%s\n", nombre);
             fprintf(fpasm, "\tcall scan_boolean\n");
-            fprintf(fpasm, "\tcall add esp, 4\n\n");
+            fprintf(fpasm, "\tadd esp, 4\n\n");
             break;
 
         default:
@@ -366,16 +367,18 @@ void leer(FILE* fpasm, char* nombre, int tipo) {
 
 void escribir(FILE* fpasm, int es_variable, int tipo){
     if(es_variable){
-        fprintf(fpasm, "\tpop eax\n");
+        fprintf(fpasm, "\n\tpop eax\n");
         fprintf(fpasm, "\tpush dword [eax]\n");
     }
     switch(tipo){
         case ENTERO:
-            fprintf(fpasm, "\tcall print_int\n");
-            fprintf(fpasm, "\tadd esp, 4");
+            fprintf(fpasm, "\n\tcall print_int\n");
+            fprintf(fpasm, "\tcall print_endofline\n");
+            fprintf(fpasm, "\tadd esp, 4\n");
             break;
         case BOOLEANO:
-            fprintf(fpasm, "\tcall print_boolean\n");
+            fprintf(fpasm, "\n\tcall print_boolean\n");
+            fprintf(fpasm, "\tcall print_endofline\n");
             fprintf(fpasm, "\tadd esp, 4\n");
             break;
         default:

@@ -63,13 +63,3 @@ while_fin:
 programa_fin:
 	mov esp, [__esp]
     ret
-
-
-
-if eax == 0:
-    eax != 0
-else
-    eax = 0
-
-11111111111
-00000000000
