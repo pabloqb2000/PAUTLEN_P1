@@ -7,6 +7,9 @@
 #define ENTERO 0
 #define BOOLEANO 1
 
+/* Máximo número de etiquetas */
+#define MAX_ETIQUETAS 1024
+
 /* OBSERVACIÓN GENERAL A TODAS LAS FUNCIONES:
 Todas ellas escriben el código NASM a un FILE* proporcionado como primer
 argumento.

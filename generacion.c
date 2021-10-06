@@ -66,7 +66,7 @@ guarda el puntero de pila en su variable (se recomienda usar __esp).
 void escribir_inicio_main(FILE* fpasm) {
     fprintf(fpasm, "\n");
     fprintf(fpasm, "main:\n");
-    fprintf(fpasm, "\tmov dword [__esp], esp\n");
+    fprintf(fpasm, "\tmov dword [__esp], esp\n\n");
 }
 
 /*
@@ -111,7 +111,6 @@ void escribir_operando(FILE* fpasm, char* nombre, int es_variable) {
 una referencia (1) o ya un valor explícito (0).
 */
 void asignar(FILE* fpasm, char* nombre, int es_variable) {
-    fprintf(fpasm, "\n");
     fprintf(fpasm, "\tpop eax\n");
 
     if (es_variable == 1) {
@@ -385,3 +384,50 @@ void escribir(FILE* fpasm, int es_variable, int tipo){
             printf("La escritura de este tipo no esta implementada.\n");
     }
 }
+
+
+/* FUNCIONES DE ESTRUCTURA */
+
+/*
+Generación de código para el inicio de una estructura do-while
+Como es el inicio de uno bloque de control de flujo de programa en este ejercicio opcional no es necesario
+ tener encuenta control de etiquetas para do-while anidado.
+*/
+void dowhile_inicio(FILE * fpasm, int etiqueta) {
+    fprintf(fpasm, "\ndowhile_inicio_%d:\n", etiqueta);
+}
+
+/*
+Generación de código para el momento en el que se ha generado el código de la expresión
+de control del bucle
+Sólo necesita usar la etiqueta adecuada, por lo que sólo se necesita que se recupere el valor
+de la etiqueta que corresponde al momento actual.
+exp_es_variable
+Es 1 si la expresión de la condición es algo asimilable a una variable (identificador,
+o elemento de vector)
+Es 0 en caso contrario (constante u otro tipo de expresión)
+*/
+void dowhile_exp_pila (FILE * fpasm, int exp_es_variable, int etiqueta) {
+    // Almacenar variable 1
+    fprintf(fpasm, "\tpop eax\n");
+    if (exp_es_variable)
+        fprintf(fpasm, "\tmov eax, [eax]\n");
+
+    // Hacer comparacion y saltar
+    fprintf(fpasm, "\tcmp eax, 0\n");
+    fprintf(fpasm, "\tje dowhile_fin_%d\n", etiqueta);
+    fprintf(fpasm, "\tjmp dowhile_inicio_%d\n", etiqueta);
+}
+
+/*
+Generación de código para el final de una estructura dowhile
+Como es el fin de uno bloque de control de flujo de programa que hace uso de la etiqueta
+del mismo se requiere que antes de su invocación tome el valor de la etiqueta que le toca
+según se ha explicado
+Y tras ser invocada debe realizar el proceso para ajustar la información de las etiquetas
+puesto que se ha liberado la última de ellas.
+*/
+void dowhile_fin( FILE * fpasm, int etiqueta) {
+    fprintf(fpasm, "\ndowhile_fin_%d:\n", etiqueta);
+}
+
