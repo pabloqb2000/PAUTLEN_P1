@@ -6,52 +6,52 @@ int main (int argc, char ** argv)
     int getiqueta = 0;
     int etiquetas[MAX_ETIQUETAS];
     int cima_etiquetas=-1;
-    FILE * fd_asm;
+    FILE * fasm;
 
-    fd_asm = fopen(argv[1],"w");
+    fasm = fopen(argv[1],"w");
 
-    escribir_subseccion_data(fd_asm);
-    escribir_cabecera_bss(fd_asm);
+    escribir_subseccion_data(fasm);
+    escribir_cabecera_bss(fasm);
 
     //int z;
-    declarar_variable(fd_asm,"z", 1, 1);
-    escribir_segmento_codigo(fd_asm);
+    declarar_variable(fasm,"z", 1, 1);
+    escribir_segmento_codigo(fasm);
 
     //Declaramos la funcion. Vamos a imprimir su etiqueta y decir que tiene una variable local.
     //function int doble(int arg)
     //{
     // int auxArg;
-    declararFuncion(fd_asm,"doble",1);
+    declararFuncion(fasm,"doble",1);
 
     //auxArg = arg; Asignacion de parametro a variable local. Solo hay un parametro.
-    escribirParametro(fd_asm,0,1);
-    escribirVariableLocal(fd_asm,1);
-    asignarDestinoEnPila(fd_asm,1);
+    escribirParametro(fasm,0,1);
+    escribirVariableLocal(fasm,1);
+    asignarDestinoEnPila(fasm,1);
 
     //2*arg.
-    escribir_operando(fd_asm,"2",0);
-    escribirParametro(fd_asm,0,1);
-    multiplicar(fd_asm,0,1);
+    escribir_operando(fasm,"2",0);
+    escribirParametro(fasm,0,1);
+    multiplicar(fasm,0,1);
 
     //Retornamos de la funcion con lo que esta encima de la pila.
-    retornarFuncion(fd_asm,0);
-    escribir_inicio_main(fd_asm);
+    retornarFuncion(fasm,0);
+    escribir_inicio_main(fasm);
 
     //z=2
-    escribir_operando(fd_asm,"2",0);
-    asignar(fd_asm,"z",0);
-    escribir_operando(fd_asm,"z",1);
+    escribir_operando(fasm,"2",0);
+    asignar(fasm,"z",0);
+    escribir_operando(fasm,"z",1);
 
     // printf doble(z)
     //Llamamos a la funcion que tiene 1 argumento. Estamos dando un salto a la etiqueta. Primero apilamos el parametro.
-    operandoEnPilaAArgumento(fd_asm,1);
-    llamarFuncion(fd_asm,"doble",1);
+    operandoEnPilaAArgumento(fasm,1);
+    llamarFuncion(fasm,"doble",1);
 
     //Imprimimos el resultado de la funcion.
-    escribir(fd_asm,0,ENTERO);
+    escribir(fasm,0,ENTERO);
 
-    escribir_fin(fd_asm);
+    escribir_fin(fasm);
     
-    fclose(fd_asm);
+    fclose(fasm);
     return 0;
 }

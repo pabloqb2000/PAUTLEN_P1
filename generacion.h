@@ -241,7 +241,6 @@ puesto que se ha liberado la última de ellas.
 */
 
 void dowhile_inicio(FILE * fpasm, int etiqueta);
-
 /*
 Generación de código para el inicio de una estructura do-while
 Como es el inicio de uno bloque de control de flujo de programa en este ejercicio opcional no es necesario
@@ -285,7 +284,7 @@ Según se especifica en el material, es suficiente con utilizar dos registros pa
 tarea.
 */
 
-void declararFuncion(FILE * fd_asm, char * nombre_funcion, int num_var_loc);
+void declararFuncion(FILE * fasm, char * nombre_funcion, int num_var_loc);
 /*
 Generación de código para iniciar la declaración de una función.
 Es necesario proporcionar
@@ -293,7 +292,7 @@ Su nombre
 Su número de variables locales
 */
 
-void retornarFuncion(FILE * fd_asm, int es_variable);
+void retornarFuncion(FILE * fasm, int es_variable);
 /*
 Generación de código para el retorno de una función.
 La expresión que se retorna está en la cima de la pila.
@@ -329,7 +328,7 @@ Es 1 si la expresión que se va a asignar es algo asimilable a una variable
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
 
-void operandoEnPilaAArgumento(FILE * fd_asm, int es_variable);
+void operandoEnPilaAArgumento(FILE * fasm, int es_variable);
 /*
 Como habrás visto en el material, nuestro convenio de llamadas a las funciones asume que
 los argumentos se pasan por valor, esto significa que siempre se dejan en la pila “valores” y
@@ -338,7 +337,7 @@ Esta función realiza la tarea de dado un operando escrito en la pila y sabiendo
 o no (es_variable) se deja en la pila el valor correspondiente
 */
 
-void llamarFuncion(FILE * fd_asm, char * nombre_funcion, int num_argumentos);
+void llamarFuncion(FILE * fasm, char * nombre_funcion, int num_argumentos);
 /*
 Esta función genera código para llamar a la función nombre_funcion asumiendo que los
 argumentos están en la pila en el orden fijado en el material de la asignatura.
@@ -347,7 +346,7 @@ argumentos
 Para limpiar la pila puede utilizar la función de nombre limpiarPila
 */
 
-void limpiarPila(FILE * fd_asm, int num_argumentos);
+void limpiarPila(FILE * fasm, int num_argumentos);
 /*
 Genera código para limpiar la pila tras invocar una función
 Esta función es necesaria para completar la llamada a métodos, su gestión dificulta el
