@@ -597,19 +597,16 @@ void escribir_elemento_vector(FILE * fpasm,char * nombre_vector, int tam_max, in
         fprintf(fpasm,"\tmov eax, [eax]\n");
     }
     // Comprobamos el valor del indice
+    fprintf(fpasm, "\tcmp eax, 0\n");
+    fprintf(fpasm, "\tjl tamano_array_fin\n");
     fprintf(fpasm, "\tcmp eax, %d\n", tam_max);
     fprintf(fpasm, "\tjge tamano_array_fin\n");
-
-    // Leemos el valor a guardar
-    fprintf(fpasm, "\tpop ebx\n");    
-
     // eax = _nombre_vector + (eax*4)
     fprintf(fpasm, "\tshl eax, 2\n");
     fprintf(fpasm, "\tadd eax, _%s\n", nombre_vector);
 
     // Almacenamos en la pila para despues llamar a asignaDestinoEnPila
     fprintf(fpasm, "\tpush eax\n");
-    fprintf(fpasm, "\tpush ebx\n");
 }
 
 
@@ -659,9 +656,7 @@ Función para dejar en la cima de la pila la dirección efectiva de la variable 
 la posición posicion_variable_local (recuerda que ordenadas con origen 1)
 */
 void escribirVariableLocal(FILE* fpasm, int posicion_variable_local){
-    fprintf(fpasm, "\tmov ebx, ebp\n");
-    fprintf(fpasm, "\tsub ebx, %d\n", 4*posicion_variable_local);
-    fprintf(fpasm, "\tlea eax, [ebx]\n");
+    fprintf(fpasm, "\tlea eax, [ebp - %d]\n", 4*posicion_variable_local);
     fprintf(fpasm, "\tpush dword eax\n");
 }
 
@@ -679,13 +674,13 @@ Es 1 si la expresión que se va a asignar es algo asimilable a una variable
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
 void asignarDestinoEnPila(FILE* fpasm, int es_variable) {
+    // Leemos direccion donde hay que asignar
+    fprintf(fpasm, "\tpop eax\n");
+
     // Leemos valor a asignar
     fprintf(fpasm, "\tpop ebx\n");
     if (es_variable)
         fprintf(fpasm, "\tmov ebx, [ebx]\n");
-
-    // Leemos direccion donde hay que asignar
-    fprintf(fpasm, "\tpop eax\n");
 
     // Asignamos el valor
     fprintf(fpasm, "\tmov [eax], ebx\n");    
@@ -714,9 +709,9 @@ argumentos
 Para limpiar la pila puede utilizar la función de nombre limpiarPila
 */
 void llamarFuncion(FILE * fasm, char * nombre_funcion, int num_argumentos) {
-    fprintf(fasm, "\tpush dword _%s_funcion\n", nombre_funcion);
     fprintf(fasm, "\tcall _%s_funcion\n", nombre_funcion);
     limpiarPila(fasm, num_argumentos);
+    fprintf(fasm, "\tpush eax\n");
 }
 
 /*
