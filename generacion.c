@@ -19,7 +19,7 @@ En este punto, al menos, debes ser capaz de detectar la división por 0.
 void escribir_subseccion_data(FILE* fpasm) {
     fprintf(fpasm, "segment .data\n");
     fprintf(fpasm, "\terror_division_0 db \"Error division por 0!\", 0\n");
-    fprintf(fpasm, "\terror_tamano_array db \"El indice supera el tamano del array!\", 0\n");
+    fprintf(fpasm, "\terror_tamano_array db \"Indice de vector fuera de rango\", 0\n");
 }
 
 /*
@@ -559,7 +559,6 @@ void while_exp_pila (FILE * fpasm, int exp_es_variable, int etiqueta) {
     // Hacer comparacion y saltar
     fprintf(fpasm, "\tcmp eax, 0\n");
     fprintf(fpasm, "\tje while_fin_%d\n", etiqueta);
-    fprintf(fpasm, "\tjmp while_inicio_%d\n", etiqueta);
 }
 
 /*
@@ -571,6 +570,7 @@ Y tras ser invocada debe realizar el proceso para ajustar la información de las
 puesto que se ha liberado la última de ellas.
 */
 void while_fin( FILE * fpasm, int etiqueta) {
+    fprintf(fpasm, "\tjmp while_inicio_%d\n", etiqueta);
     fprintf(fpasm, "\nwhile_fin_%d:\n", etiqueta);
 }
 
@@ -591,12 +591,25 @@ Valor a introducir
 donde introducir
 */
 void escribir_elemento_vector(FILE * fpasm,char * nombre_vector, int tam_max, int exp_es_direccion){
-    fprintf(fpasm, "\tpop dowrd eax\n"); //eax = m
-    fprintf(fpasm, "\tpop dword ebx\n"); //ebx = dir. del elemento o elemento
+    // Leemos el indice en eax
+    fprintf(fpasm, "\tpop eax\n");
     if(exp_es_direccion){
-        fprintf(fpasm,"\tmov dword ebx, [ebx]\n"); //ebx = valor
+        fprintf(fpasm,"\tmov eax, [eax]\n");
     }
-    fprintf(fpasm, "\tmov dword _%s[eax], ebx");
+    // Comprobamos el valor del indice
+    fprintf(fpasm, "\tcmp eax, %d\n", tam_max);
+    fprintf(fpasm, "\tjge tamano_array_fin\n");
+
+    // Leemos el valor a guardar
+    fprintf(fpasm, "\tpop ebx\n");    
+
+    // eax = _nombre_vector + (eax*4)
+    fprintf(fpasm, "\tshl eax, 2\n");
+    fprintf(fpasm, "\tadd eax, _%s\n", nombre_vector);
+
+    // Almacenamos en la pila para despues llamar a asignaDestinoEnPila
+    fprintf(fpasm, "\tpush eax\n");
+    fprintf(fpasm, "\tpush ebx\n");
 }
 
 
@@ -609,7 +622,7 @@ Su nombre
 Su número de variables locales
 */
 void declararFuncion(FILE * fpasm, char * nombre_funcion, int num_var_loc){
-    fprintf(fpasm, "\n_%s_funcion:\n");
+    fprintf(fpasm, "\n_%s_funcion:\n", nombre_funcion);
     fprintf(fpasm, "\tpush ebp\n");
     fprintf(fpasm, "\tmov ebp, esp\n");
     fprintf(fpasm, "\tsub esp, %d\n", 4*num_var_loc);
@@ -624,7 +637,7 @@ Puede ser un valor concreto (en ese caso exp_es_direccion vale 0)
 void retornarFuncion(FILE * fpasm, int es_variable){
     fprintf(fpasm, "\tpop eax\n");
     if(es_variable){
-        fprintf(fpasm, "\tmov dword eax, [eax]\n");
+        fprintf(fpasm, "\tmov eax, [eax]\n");
     }
     fprintf(fpasm, "\tmov esp, ebp\n");
     fprintf(fpasm, "\tpop ebp\n");
@@ -637,8 +650,8 @@ posición pos_parametro (recuerda que los parámetros se ordenan con origen 0) d
 de num_total_parametros
 */
 void escribirParametro(FILE* fpasm, int pos_parametro, int num_total_parametros){
-    fprintf(fpasm, "\tlea eax, [ebp]%d", 4*(1 + (num_total_parametros - pos_parametro)));
-    fprintf(fpasm, "\tpush dword eax\n");
+    fprintf(fpasm, "\tlea eax, [ebp+%d]\n", 4*(1 + (num_total_parametros - pos_parametro)));
+    fprintf(fpasm, "\tpush eax\n");
 }
 
 /*
@@ -666,13 +679,13 @@ Es 1 si la expresión que se va a asignar es algo asimilable a una variable
 Es 0 en caso contrario (constante u otro tipo de expresión)
 */
 void asignarDestinoEnPila(FILE* fpasm, int es_variable) {
-    // Leemos direccion donde hay que asignar
-    fprintf(fpasm, "\tpop eax\n");
-
     // Leemos valor a asignar
     fprintf(fpasm, "\tpop ebx\n");
     if (es_variable)
         fprintf(fpasm, "\tmov ebx, [ebx]\n");
+
+    // Leemos direccion donde hay que asignar
+    fprintf(fpasm, "\tpop eax\n");
 
     // Asignamos el valor
     fprintf(fpasm, "\tmov [eax], ebx\n");    
@@ -689,7 +702,7 @@ void operandoEnPilaAArgumento(FILE * fasm, int es_variable) {
     if(es_variable) {
         fprintf(fasm, "\tpop eax\n");
         fprintf(fasm, "\tmov eax, [eax]\n");
-        fprintf(fasm, "\tpush eax");
+        fprintf(fasm, "\tpush eax\n");
     }
 }
 
@@ -701,8 +714,8 @@ argumentos
 Para limpiar la pila puede utilizar la función de nombre limpiarPila
 */
 void llamarFuncion(FILE * fasm, char * nombre_funcion, int num_argumentos) {
-    fprintf(fasm, "\tpush dword _%s\n", nombre_funcion);
-    fprintf(fasm, "\tcall %s\n", nombre_funcion);
+    fprintf(fasm, "\tpush dword _%s_funcion\n", nombre_funcion);
+    fprintf(fasm, "\tcall _%s_funcion\n", nombre_funcion);
     limpiarPila(fasm, num_argumentos);
 }
 
